@@ -1,14 +1,15 @@
 import React, { useState } from 'react';
+import { motion, AnimatePresence } from 'motion/react';
 import { useDarkMode } from '../hooks/useDarkMode';
 import { useCart } from '../hooks/useCart';
 import { Sun, Moon, ShoppingCart } from '@phosphor-icons/react';
 
 /**
- * Navbar component for global navigation.
- * Renders a sticky floating glass pill with logo, nav links, 
- * dark mode toggle, and cart badge. Fully responsive on mobile.
+ * Component Navbar đại diện cho thanh điều hướng toàn cục của dự án.
+ * Thiết kế dưới dạng một viên thuốc trôi nổi (glass pill) sử dụng glassmorphism,
+ * tích hợp bộ chuyển đổi Dark Mode, giỏ hàng, menu điều hướng và phiên bản responsive trên di động.
  * 
- * @returns {JSX.Element} The rendered Navbar component.
+ * @returns {JSX.Element} Thanh điều hướng Navbar hoàn chỉnh.
  */
 export const Navbar = React.memo(function Navbar() {
   const { isDarkMode, toggleDarkMode } = useDarkMode();
@@ -108,14 +109,25 @@ export const Navbar = React.memo(function Navbar() {
           <button
             type="button"
             onClick={toggleDarkMode}
-            className="p-2.5 rounded-full border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 active:scale-[0.95] transition-all duration-200 cursor-pointer"
             aria-label="Chuyển chế độ giao diện"
+            className="p-2.5 rounded-full border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 active:scale-[0.95] transition-all duration-200 cursor-pointer overflow-hidden relative flex items-center justify-center w-[38px] h-[38px]"
           >
-            {isDarkMode ? (
-              <Sun size={18} weight="regular" />
-            ) : (
-              <Moon size={18} weight="regular" />
-            )}
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div
+                key={isDarkMode ? 'dark' : 'light'}
+                initial={{ y: -10, opacity: 0, rotate: -90 }}
+                animate={{ y: 0, opacity: 1, rotate: 0 }}
+                exit={{ y: 10, opacity: 0, rotate: 90 }}
+                transition={{ duration: 0.2, ease: 'easeInOut' }}
+                className="flex items-center justify-center shrink-0"
+              >
+                {isDarkMode ? (
+                  <Sun size={18} weight="regular" />
+                ) : (
+                  <Moon size={18} weight="regular" />
+                )}
+              </motion.div>
+            </AnimatePresence>
           </button>
 
           {/* Morphing Hamburger Menu Button (Mobile) */}
