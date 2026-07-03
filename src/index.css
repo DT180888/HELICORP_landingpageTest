@@ -51,13 +51,17 @@ html.dark {
 }
 
 @layer base {
-  html, body {
+  html {
+    scroll-behavior: smooth;
+    height: 100%;
+  }
+
+  body {
     background-color: var(--bg-color);
     color: var(--text-color);
     font-family: var(--font-sans);
-    scroll-behavior: smooth;
     overflow-x: hidden;
-    min-height: 100dvh;
+    min-height: 100%;
     transition: background-color 0.5s cubic-bezier(0.16, 1, 0.3, 1), color 0.5s cubic-bezier(0.16, 1, 0.3, 1);
   }
   
