@@ -5,6 +5,7 @@ import { Hero } from './sections/Hero';
 import { SmartDashboard } from './sections/SmartDashboard';
 import { TechSpecs } from './sections/TechSpecs';
 import { SubscribeForm } from './sections/SubscribeForm';
+import { MiniCart } from './components/MiniCart';
 
 /**
  * Component App chính của hệ thống.
@@ -22,6 +23,9 @@ function App() {
 
         {/* Global sticky navigation bar */}
         <Navbar />
+
+        {/* Giỏ hàng mini (MiniCart Drawer) */}
+        <MiniCart />
 
         {/* Main page content sections */}
         <main className="flex-grow">

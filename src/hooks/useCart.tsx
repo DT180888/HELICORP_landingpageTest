@@ -1,9 +1,8 @@
 /* eslint-disable react-refresh/only-export-components */
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
-
 /**
- * Interface representing a product item in the shopping cart.
+ * Đại diện cho một sản phẩm trong giỏ hàng.
  */
 export interface CartItem {
   id: string;
@@ -14,7 +13,7 @@ export interface CartItem {
 }
 
 /**
- * Interface representing a product item details for adding/wishlisting.
+ * Đại diện cho thông tin sản phẩm thô để thêm vào giỏ hàng hoặc danh sách yêu thích.
  */
 export interface Product {
   id: string;
@@ -24,11 +23,13 @@ export interface Product {
 }
 
 /**
- * Interface representing the cart context value.
+ * Định nghĩa cấu trúc kiểu dữ liệu của Cart Context.
  */
 interface CartContextType {
   cart: CartItem[];
-  wishlist: string[]; // List of product IDs
+  wishlist: string[];
+  isCartOpen: boolean;
+  setIsCartOpen: (isOpen: boolean) => void;
   addToCart: (product: Product) => void;
   removeFromCart: (productId: string) => void;
   updateQuantity: (productId: string, quantity: number) => void;
@@ -40,36 +41,41 @@ interface CartContextType {
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 /**
- * Provider component for managing cart and wishlist state globally.
+ * Provider quản lý trạng thái giỏ hàng và danh sách yêu thích toàn cục.
  * 
- * @param {React.ReactNode} props.children The child components.
- * @returns {JSX.Element} The rendered Provider component.
+ * @param {React.ReactNode} props.children Các component con.
+ * @returns {JSX.Element} Provider cung cấp state giỏ hàng.
  */
 export function CartProvider({ children }: { children: React.ReactNode }) {
-  // Initialize state from Local Storage
+  // Khởi tạo giỏ hàng từ Local Storage
   const [cart, setCart] = useState<CartItem[]>(() => {
     const savedCart = localStorage.getItem('helicorp_cart');
     return savedCart ? JSON.parse(savedCart) : [];
   });
 
+  // Khởi tạo danh sách yêu thích từ Local Storage
   const [wishlist, setWishlist] = useState<string[]>(() => {
     const savedWishlist = localStorage.getItem('helicorp_wishlist');
     return savedWishlist ? JSON.parse(savedWishlist) : [];
   });
 
-  // Sync state to Local Storage
+  // Trạng thái đóng/mở của Giỏ hàng Mini (MiniCart)
+  const [isCartOpen, setIsCartOpen] = useState<boolean>(false);
+
+  // Đồng bộ giỏ hàng với Local Storage
   useEffect(() => {
     localStorage.setItem('helicorp_cart', JSON.stringify(cart));
   }, [cart]);
 
+  // Đồng bộ danh sách yêu thích với Local Storage
   useEffect(() => {
     localStorage.setItem('helicorp_wishlist', JSON.stringify(wishlist));
   }, [wishlist]);
 
   /**
-   * Adds a product to the shopping cart. If already present, increments quantity.
+   * Thêm sản phẩm vào giỏ hàng. Nếu sản phẩm đã tồn tại, tăng số lượng thêm 1.
    * 
-   * @param {Product} product The product object to add.
+   * @param {Product} product Đối tượng sản phẩm muốn thêm.
    */
   const addToCart = (product: Product) => {
     setCart((prevCart) => {
@@ -81,22 +87,24 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       }
       return [...prevCart, { ...product, quantity: 1 }];
     });
+    // Tự động mở giỏ hàng khi thêm thành công để tăng tương tác người dùng
+    setIsCartOpen(true);
   };
 
   /**
-   * Removes a product from the shopping cart.
+   * Xóa sản phẩm khỏi giỏ hàng.
    * 
-   * @param {string} productId The ID of the product to remove.
+   * @param {string} productId ID của sản phẩm cần xóa.
    */
   const removeFromCart = (productId: string) => {
     setCart((prevCart) => prevCart.filter((item) => item.id !== productId));
   };
 
   /**
-   * Updates the quantity of a product in the cart.
+   * Cập nhật số lượng của một sản phẩm trong giỏ hàng.
    * 
-   * @param {string} productId The ID of the product.
-   * @param {number} quantity The new quantity (must be >= 1).
+   * @param {string} productId ID của sản phẩm.
+   * @param {number} quantity Số lượng mới (bắt buộc phải >= 1).
    */
   const updateQuantity = (productId: string, quantity: number) => {
     if (quantity < 1) return;
@@ -108,16 +116,16 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   /**
-   * Empties all items in the shopping cart.
+   * Làm trống toàn bộ giỏ hàng.
    */
   const clearCart = () => {
     setCart([]);
   };
 
   /**
-   * Toggles a product in the wishlist (adds if not present, removes if present).
+   * Thêm/Bỏ sản phẩm khỏi danh sách yêu thích.
    * 
-   * @param {string} productId The ID of the product.
+   * @param {string} productId ID của sản phẩm.
    */
   const toggleWishlist = (productId: string) => {
     setWishlist((prevWishlist) => {
@@ -129,10 +137,10 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
   };
 
   /**
-   * Helper function to check if a product is in the wishlist.
+   * Kiểm tra xem sản phẩm có nằm trong danh sách yêu thích không.
    * 
-   * @param {string} productId The ID of the product.
-   * @returns {boolean} True if the product is wishlisted.
+   * @param {string} productId ID của sản phẩm.
+   * @returns {boolean} True nếu nằm trong danh sách yêu thích.
    */
   const isInWishlist = (productId: string): boolean => {
     return wishlist.includes(productId);
@@ -143,6 +151,8 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
       value={{
         cart,
         wishlist,
+        isCartOpen,
+        setIsCartOpen,
         addToCart,
         removeFromCart,
         updateQuantity,
@@ -157,15 +167,14 @@ export function CartProvider({ children }: { children: React.ReactNode }) {
 }
 
 /**
- * Custom hook to consume the CartContext state and actions.
- * Throws an error if used outside a CartProvider.
+ * Hook tùy chỉnh để sử dụng nhanh giỏ hàng từ bất kỳ component con nào.
  * 
- * @returns {CartContextType} The cart context state and actions.
+ * @returns {CartContextType} Tập hợp các biến trạng thái và hành động giỏ hàng.
  */
 export function useCart() {
   const context = useContext(CartContext);
   if (context === undefined) {
-    throw new Error('useCart must be used within a CartProvider');
+    throw new Error('useCart phải được bọc trong một CartProvider');
   }
   return context;
 }
