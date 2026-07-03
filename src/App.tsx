@@ -6,6 +6,7 @@ import { SmartDashboard } from './sections/SmartDashboard';
 import { TechSpecs } from './sections/TechSpecs';
 import { SubscribeForm } from './sections/SubscribeForm';
 import { MiniCart } from './components/MiniCart';
+import { ChatbotWidget } from './components/ChatbotWidget';
 
 /**
  * Component App chính của hệ thống.
@@ -26,6 +27,9 @@ function App() {
 
         {/* Giỏ hàng mini (MiniCart Drawer) */}
         <MiniCart />
+
+        {/* Cửa sổ Chatbot AI (Chatbot Widget) */}
+        <ChatbotWidget />
 
         {/* Main page content sections */}
         <main className="flex-grow">
