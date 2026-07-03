@@ -1,20 +1,41 @@
+import { CartProvider } from './hooks/useCart';
+import { Navbar } from './components/Navbar';
+import { Footer } from './components/Footer';
+import { Hero } from './sections/Hero';
+import { SmartDashboard } from './sections/SmartDashboard';
+import { TechSpecs } from './sections/TechSpecs';
+import { SubscribeForm } from './sections/SubscribeForm';
+
 /**
- * Root component of the application.
- * Renders the base setup structure.
+ * Main App component.
+ * Integrates the global CartProvider context and structured layout.
  * 
- * @returns {JSX.Element} The rendered App component.
+ * @returns {JSX.Element} The rendered root layout.
  */
 function App() {
   return (
-    <main className="flex min-h-[100dvh] flex-col items-center justify-center p-6 text-center">
-      <h1 className="text-4xl font-bold tracking-tighter text-accent-teal md:text-6xl">
-        Helicorp Smart Hub
-      </h1>
-      <p className="mt-4 text-zinc-400 max-w-md text-base leading-relaxed">
-        Hệ thống điều khiển nhà thông minh thế hệ mới. Khởi tạo nền móng thành công và sẵn sàng thiết lập giao diện.
-      </p>
-    </main>
-  )
+    <CartProvider>
+      <div className="relative min-h-screen flex flex-col bg-oled-black text-zinc-100 selection:bg-accent-teal/30 selection:text-accent-teal">
+        {/* Subtle background glow effect (Ethereal Glass theme) */}
+        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-accent-teal/5 blur-[120px] pointer-events-none" />
+        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-accent-blue/5 blur-[120px] pointer-events-none" />
+
+        {/* Global sticky navigation bar */}
+        <Navbar />
+
+        {/* Main page content sections */}
+        <main className="flex-grow">
+          <Hero />
+          <SmartDashboard />
+          <TechSpecs />
+          <SubscribeForm />
+        </main>
+
+        {/* Chân trang */}
+        <Footer />
+      </div>
+    </CartProvider>
+  );
 }
 
-export default App
+export default App;
