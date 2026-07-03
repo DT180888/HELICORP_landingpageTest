@@ -1,6 +1,7 @@
 import React from 'react';
 import { motion } from 'motion/react';
 import { ArrowUpRight } from '@phosphor-icons/react';
+import { useCart } from '../hooks/useCart';
 import hubDeviceImg from '../assets/hub_device.webp';
 
 /**
@@ -12,6 +13,7 @@ import hubDeviceImg from '../assets/hub_device.webp';
  * @returns {JSX.Element} Giao diện khối Hero.
  */
 export const Hero = React.memo(function Hero() {
+  const { addToCart } = useCart();
   
   /**
    * Cuộn mượt mà xuống phần tính năng (Bảng điều khiển).
@@ -87,10 +89,10 @@ export const Hero = React.memo(function Hero() {
             
             {/* CTA chính với cấu trúc lồng vòng tròn icon */}
             <button
-              onClick={handleLearnMore}
+              onClick={() => addToCart({ id: 'helicorp-hub-01', name: 'Bộ Điều Khiển Helicorp Hub', price: 4890000, image: hubDeviceImg })}
               className="group pl-6 pr-2.5 py-2.5 rounded-full bg-linear-to-r from-accent-teal to-accent-blue text-zinc-950 font-bold text-sm flex items-center gap-3.5 hover:shadow-lg hover:shadow-accent-teal/20 transition-all duration-300 active:scale-[0.98] cursor-pointer"
             >
-              <span>Trải nghiệm ngay</span>
+              <span>Mua ngay</span>
               <span className="w-8 h-8 rounded-full bg-white/25 dark:bg-black/10 flex items-center justify-center group-hover:translate-x-1 group-hover:-translate-y-[1px] transition-transform duration-300">
                 <ArrowUpRight size={14} weight="bold" />
               </span>

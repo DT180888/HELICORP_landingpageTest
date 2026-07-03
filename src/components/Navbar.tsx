@@ -13,7 +13,7 @@ import { Sun, Moon, ShoppingCart } from '@phosphor-icons/react';
  */
 export const Navbar = React.memo(function Navbar() {
   const { isDarkMode, toggleDarkMode } = useDarkMode();
-  const { cart } = useCart();
+  const { cart, setIsCartOpen } = useCart();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   // Calculate total number of items in the cart
@@ -94,6 +94,7 @@ export const Navbar = React.memo(function Navbar() {
           {/* Shopping Cart Button */}
           <button 
             type="button"
+            onClick={() => setIsCartOpen(true)}
             className="relative p-2.5 rounded-full border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-100 dark:hover:bg-zinc-900 active:scale-[0.95] transition-all duration-200 cursor-pointer"
             aria-label="Xem giỏ hàng"
           >
