@@ -2,7 +2,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'motion/react';
 import { ArrowUpRight, ArrowDown, WifiHigh, Lightning, ShieldCheck } from '@phosphor-icons/react';
 import { useCart } from '../hooks/useCart';
-import hubDeviceImg from '../assets/hub_device.webp';
+import hubDeviceImg from '../assets/hub_device_compressed.webp';
 
 // ─── Custom cubic-bezier — spring-like mass physics ───────────────────────
 const SPRING = [0.32, 0.72, 0, 1] as const;
@@ -56,9 +56,8 @@ export const Hero = React.memo(function Hero() {
       className="
         relative min-h-[100dvh] overflow-hidden
         bg-zinc-50   dark:bg-oled-black
-        flex flex-col lg:flex-row items-center
-        px-5 sm:px-8 lg:px-16 xl:px-24
-        pt-28 pb-16 lg:py-0 gap-12 lg:gap-0
+        flex flex-col items-center justify-center
+        px-6 pt-28 pb-16 lg:py-0
         transition-colors duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]
       "
     >
@@ -91,9 +90,10 @@ export const Hero = React.memo(function Hero() {
         />
       </div>
 
-      {/* ══════════════════════════════════════════════════════════════════
-          LEFT COLUMN — Typography + CTAs + Stat chips
-      ══════════════════════════════════════════════════════════════════ */}
+      <div className="max-w-6xl mx-auto w-full flex flex-col md:flex-row items-center gap-12 lg:gap-0 relative z-10">
+        {/* ══════════════════════════════════════════════════════════════════
+            LEFT COLUMN — Typography + CTAs + Stat chips
+        ══════════════════════════════════════════════════════════════════ */}
       <div className="
         relative z-10 flex flex-col items-start gap-7
         w-full lg:w-[52%] xl:w-[48%]
@@ -132,7 +132,7 @@ export const Hero = React.memo(function Hero() {
           transition={transition(0.08)}
           className="
             font-display font-black tracking-tighter leading-[1.02]
-            text-[clamp(2.6rem,6vw,5.25rem)]
+            text-3xl sm:text-4xl lg:text-5xl
             text-zinc-900 dark:text-white
           "
         >
@@ -284,6 +284,7 @@ export const Hero = React.memo(function Hero() {
             hover:text-accent-teal dark:hover:text-accent-teal
             transition-colors duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]
             cursor-pointer
+            w-full justify-center md:justify-start md:ml-2
           "
           aria-label="Cuộn xuống xem tính năng"
         >
@@ -313,12 +314,14 @@ export const Hero = React.memo(function Hero() {
           w-full lg:w-[48%] xl:w-[52%]
           flex items-center justify-center
           lg:h-[100dvh]
+          
         "
         aria-hidden="true"
       >
         {/* Ambient glow behind device */}
         <div className="
           absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
+          
           w-[110%] h-[110%] rounded-full pointer-events-none
           bg-[radial-gradient(ellipse_at_center,rgba(0,201,177,0.07)_0%,transparent_65%)]
           dark:bg-[radial-gradient(ellipse_at_center,rgba(0,242,254,0.10)_0%,transparent_65%)]
@@ -326,6 +329,7 @@ export const Hero = React.memo(function Hero() {
 
         {/* ── OUTER BEZEL SHELL ──────────────────────────────────────── */}
         <div className="
+          hidden md:block
           relative w-full max-w-[520px]
           p-2 rounded-[2.4rem]
           border border-zinc-200/70       dark:border-white/10
@@ -364,8 +368,12 @@ export const Hero = React.memo(function Hero() {
               ref={imgRef}
               src={hubDeviceImg}
               alt="Bộ điều khiển thông minh Helicorp Hub — Smart Home Controller"
-              className="w-full h-auto object-cover object-top pt-7"
+              width={520}
+              height={520}
               loading="eager"
+              fetchPriority="high"
+              decoding="async"
+              className="w-full h-auto object-cover object-top pt-7"
               onLoad={() => setLoaded(true)}
               animate={loaded && !prefersReduced ? { y: [0, -7, 0] } : {}}
               transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
@@ -409,6 +417,7 @@ export const Hero = React.memo(function Hero() {
           </div>
         </div>
       </motion.div>
+      </div>
     </section>
   );
 });
