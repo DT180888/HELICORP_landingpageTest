@@ -1,250 +1,414 @@
-import React, { useState } from 'react';
-import { motion } from 'motion/react';
-import { ArrowUpRight, Lightbulb, Thermometer, ShieldCheck, SpeakerHigh } from '@phosphor-icons/react';
+import React, { useEffect, useRef, useState } from 'react';
+import { motion, useReducedMotion } from 'motion/react';
+import { ArrowUpRight, ArrowDown, WifiHigh, Lightning, ShieldCheck } from '@phosphor-icons/react';
 import { useCart } from '../hooks/useCart';
 import hubDeviceImg from '../assets/hub_device.webp';
 
+// ─── Custom cubic-bezier — spring-like mass physics ───────────────────────
+const SPRING = [0.32, 0.72, 0, 1] as const;
+
+// ─── Stat chips data ───────────────────────────────────────────────────────
+const STAT_CHIPS = [
+  { icon: WifiHigh,    label: '128 thiết bị', sub: 'kết nối' },
+  { icon: Lightning,   label: '< 50ms',        sub: 'độ trễ' },
+  { icon: ShieldCheck, label: '256-bit',        sub: 'AES mã hoá' },
+] as const;
+
+// ─── Framer variants ───────────────────────────────────────────────────────
+const fadeUp = {
+  hidden: { opacity: 0, y: 28, filter: 'blur(8px)' },
+  show:   { opacity: 1, y: 0,  filter: 'blur(0px)' },
+};
+
 /**
- * Component Hero đại diện cho phần đầu trang giới thiệu sản phẩm.
- * Hiển thị tiêu đề chính, mô tả ngắn gọn dưới 20 từ, các nút kêu gọi hành động (CTAs) 
- * và mô hình 3D của thiết bị trung tâm được tạo tự động.
- * Sử dụng thư viện Framer Motion để tạo hiệu ứng xuất hiện mượt mà.
- * 
- * @returns {JSX.Element} Giao diện khối Hero.
+ * Hero — High-End Redesign w/ Dark / Light mode.
+ * Layout : Editorial Split (text left / device right) on desktop,
+ *          vertical stack on mobile.
+ * Vibe   : Ethereal Glass — OLED black (dark) / warm off-white (light).
  */
 export const Hero = React.memo(function Hero() {
   const { addToCart } = useCart();
-  const [isHovered, setIsHovered] = useState<boolean>(false);
-  
-  /**
-   * Cuộn mượt mà xuống phần tính năng (Bảng điều khiển).
-   */
-  const handleLearnMore = () => {
-    const element = document.getElementById('dashboard');
-    if (element) {
-      const offset = 90;
-      const bodyRect = document.body.getBoundingClientRect().top;
-      const elementRect = element.getBoundingClientRect().top;
-      const elementPosition = elementRect - bodyRect;
-      const offsetPosition = elementPosition - offset;
+  const prefersReduced = useReducedMotion();
+  const [loaded, setLoaded] = useState(false);
+  const imgRef = useRef<HTMLImageElement>(null);
 
-      window.scrollTo({
-        top: offsetPosition,
-        behavior: 'smooth',
-      });
-    }
+  // Fire float animation even when image is browser-cached
+  useEffect(() => {
+    if (imgRef.current?.complete) setLoaded(true);
+  }, []);
+
+  const scrollToFeatures = () => {
+    const el = document.getElementById('dashboard');
+    if (!el) return;
+    window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 90, behavior: 'smooth' });
   };
 
+  const transition = (delay = 0) => ({
+    duration: prefersReduced ? 0 : 0.85,
+    delay:    prefersReduced ? 0 : delay,
+    ease: SPRING,
+  });
+
   return (
-    <section 
-      id="hero" 
-      className="relative min-h-[90dvh] flex items-center justify-center pt-24 md:pt-32 pb-16 px-6 overflow-hidden"
+    <section
+      id="hero"
+      aria-label="Helicorp Hub — Bộ điều khiển nhà thông minh"
+      className="
+        relative min-h-[100dvh] overflow-hidden
+        bg-zinc-50   dark:bg-oled-black
+        flex flex-col lg:flex-row items-center
+        px-5 sm:px-8 lg:px-16 xl:px-24
+        pt-28 pb-16 lg:py-0 gap-12 lg:gap-0
+        transition-colors duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]
+      "
     >
-      <div className="max-w-6xl mx-auto w-full grid grid-cols-1 md:grid-cols-2 gap-16 items-center z-10">
-        
-        {/* Khối nội dung bên trái (Left Side Copy) */}
-        <div className="flex flex-col items-start text-left gap-6">
-          
-          {/* Eyebrow Tag (Chỉ dùng tối đa 1 chiếc cho toàn bộ phần đầu trang) */}
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
-            className="inline-flex items-center px-3.5 py-1 rounded-full border border-zinc-200/50 dark:border-white/10 bg-zinc-100/50 dark:bg-white/5 backdrop-blur-md"
-          >
-            <span className="text-[10px] uppercase tracking-[0.2em] font-semibold text-zinc-600 dark:text-zinc-400 font-sans">
-              BỘ ĐIỀU KHIỂN THẾ HỆ MỚI
-            </span>
-          </motion.div>
 
-          {/* Tiêu đề chính (Headline) */}
-          <motion.h1
-            initial={{ opacity: 0, y: 20, filter: 'blur(8px)' }}
-            animate={{ opacity: 1, y: 0, filter: 'blur(0px)' }}
-            transition={{ duration: 0.8, delay: 0.1, ease: [0.16, 1, 0.3, 1] }}
-            className="text-4xl sm:text-5xl lg:text-6xl font-bold tracking-tighter leading-[1.05] text-zinc-900 dark:text-white font-display"
-          >
-            Một chạm kết nối.<br />
-            <span className="text-transparent bg-clip-text bg-linear-to-r from-accent-teal to-accent-blue">
-              Vạn thiết bị thông minh.
-            </span>
-          </motion.h1>
+      {/* ── Background: radial mesh gradient orbs ── */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-0 overflow-hidden">
 
-          {/* Mô tả ngắn gọn (Đúng 18 từ theo quy chuẩn hiệu năng) */}
-          <motion.p
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-            className="text-base sm:text-lg text-zinc-600 dark:text-zinc-400 leading-relaxed max-w-[45ch] font-sans"
-          >
-            Trải nghiệm sống thông minh và tối ưu năng lượng tức thì cùng bộ điều khiển trung tâm Helicorp OS.
-          </motion.p>
+        {/* Primary teal orb — top-left */}
+        <div className="
+          absolute -top-40 -left-32 w-[600px] h-[600px] rounded-full
+          bg-[radial-gradient(ellipse_at_center,rgba(0,242,254,0.08)_0%,transparent_70%)]
+          dark:bg-[radial-gradient(ellipse_at_center,rgba(0,242,254,0.14)_0%,transparent_70%)]
+        " />
 
-          {/* Cặp nút CTAs (Nút chính sử dụng định dạng Button-in-Button) */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.3, ease: [0.16, 1, 0.3, 1] }}
-            className="flex flex-row items-center gap-4 mt-2"
-          >
-            
-            {/* CTA chính với cấu trúc lồng vòng tròn icon */}
-            <button
-              onClick={() => addToCart({ id: 'helicorp-hub-01', name: 'Bộ Điều Khiển Helicorp Hub', price: 4890000, image: hubDeviceImg })}
-              className="group pl-6 pr-2.5 py-2.5 rounded-full bg-linear-to-r from-accent-teal to-accent-blue text-zinc-950 font-bold text-sm flex items-center gap-3.5 hover:shadow-lg hover:shadow-accent-teal/20 transition-all duration-300 active:scale-[0.98] cursor-pointer"
-            >
-              <span>Mua ngay</span>
-              <span className="w-8 h-8 rounded-full bg-white/25 dark:bg-black/10 flex items-center justify-center group-hover:translate-x-1 group-hover:-translate-y-[1px] transition-transform duration-300">
-                <ArrowUpRight size={14} weight="bold" />
-              </span>
-            </button>
+        {/* Secondary blue orb — bottom-right */}
+        <div className="
+          absolute -bottom-24 -right-24 w-[500px] h-[500px] rounded-full
+          bg-[radial-gradient(ellipse_at_center,rgba(79,172,254,0.06)_0%,transparent_70%)]
+          dark:bg-[radial-gradient(ellipse_at_center,rgba(79,172,254,0.10)_0%,transparent_70%)]
+        " />
 
-            {/* CTA phụ */}
-            <button
-              onClick={handleLearnMore}
-              className="px-6 py-3 rounded-full border border-zinc-200 dark:border-zinc-800 text-zinc-700 dark:text-zinc-300 text-sm font-semibold hover:bg-zinc-100 dark:hover:bg-zinc-900/50 active:scale-[0.98] transition-all duration-300 cursor-pointer"
-            >
-              Xem tính năng
-            </button>
+        {/* Subtle grid lines */}
+        <div
+          className="absolute inset-0 opacity-[0.018] dark:opacity-[0.025]"
+          style={{
+            backgroundImage:
+              'linear-gradient(rgba(0,242,254,0.6) 1px,transparent 1px),linear-gradient(90deg,rgba(0,242,254,0.6) 1px,transparent 1px)',
+            backgroundSize: '60px 60px',
+          }}
+        />
+      </div>
 
-          </motion.div>
+      {/* ══════════════════════════════════════════════════════════════════
+          LEFT COLUMN — Typography + CTAs + Stat chips
+      ══════════════════════════════════════════════════════════════════ */}
+      <div className="
+        relative z-10 flex flex-col items-start gap-7
+        w-full lg:w-[52%] xl:w-[48%]
+        text-left
+      ">
 
-        </div>
-
-        {/* Khối hình ảnh bên phải (Right Side mockup với hiệu ứng bay lơ lửng & mạng lưới IoT) */}
+        {/* Eyebrow badge */}
         <motion.div
-          initial={{ opacity: 0, scale: 0.95, filter: 'blur(8px)' }}
-          animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
-          transition={{ duration: 1, delay: 0.2, ease: [0.16, 1, 0.3, 1] }}
-          className="relative flex items-center justify-center w-full max-w-[500px] aspect-square"
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
+          variants={fadeUp}
+          initial="hidden"
+          animate="show"
+          transition={transition(0)}
+          className="
+            inline-flex items-center gap-2
+            px-3.5 py-1.5 rounded-full
+            border border-zinc-200/80 dark:border-white/10
+            bg-zinc-100/70    dark:bg-white/5
+            shadow-[inset_0_1px_1px_rgba(0,0,0,0.04)]
+            dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.08)]
+          "
         >
-          {/* Vòng hào quang sáng phía sau (Glow Background) */}
-          <div className={`absolute w-72 h-72 rounded-full blur-[80px] -z-10 transition-colors duration-500 ${
-            isHovered ? 'bg-accent-teal/20' : 'bg-accent-teal/10'
-          } animate-pulse`} />
-          
-          {/* Mạng lưới kết nối SVG */}
-          <svg className="absolute inset-0 w-full h-full pointer-events-none z-0 hidden sm:block" viewBox="0 0 100 100" preserveAspectRatio="none">
-            <motion.line 
-              x1="50" y1="50" x2="12" y2="12" 
-              stroke={isHovered ? '#00f2fe' : '#3f3f46'} 
-              strokeWidth="0.8" 
-              strokeDasharray="3 3"
-              animate={{ strokeDashoffset: isHovered ? [0, -20] : [0, -10] }}
-              transition={{ repeat: Infinity, ease: "linear", duration: isHovered ? 1.5 : 3 }}
-            />
-            <motion.line 
-              x1="50" y1="50" x2="88" y2="17" 
-              stroke={isHovered ? '#00f2fe' : '#3f3f46'} 
-              strokeWidth="0.8" 
-              strokeDasharray="3 3"
-              animate={{ strokeDashoffset: isHovered ? [0, -20] : [0, -10] }}
-              transition={{ repeat: Infinity, ease: "linear", duration: isHovered ? 1.5 : 3 }}
-            />
-            <motion.line 
-              x1="50" y1="50" x2="10" y2="85" 
-              stroke={isHovered ? '#00f2fe' : '#3f3f46'} 
-              strokeWidth="0.8" 
-              strokeDasharray="3 3"
-              animate={{ strokeDashoffset: isHovered ? [0, -20] : [0, -10] }}
-              transition={{ repeat: Infinity, ease: "linear", duration: isHovered ? 1.5 : 3 }}
-            />
-            <motion.line 
-              x1="50" y1="50" x2="90" y2="88" 
-              stroke={isHovered ? '#00f2fe' : '#3f3f46'} 
-              strokeWidth="0.8" 
-              strokeDasharray="3 3"
-              animate={{ strokeDashoffset: isHovered ? [0, -20] : [0, -10] }}
-              transition={{ repeat: Infinity, ease: "linear", duration: isHovered ? 1.5 : 3 }}
-            />
-          </svg>
-
-          {/* 4 Node thiết bị lơ lửng */}
-          
-          {/* Node 1: Đèn thông minh (Top-Left) */}
-          <motion.div
-            className="absolute top-[8%] left-[8%] hidden sm:flex items-center justify-center p-3 rounded-full bg-white/70 dark:bg-zinc-900/70 border border-zinc-200/50 dark:border-zinc-800/50 backdrop-blur-md shadow-lg text-zinc-700 dark:text-zinc-300 pointer-events-auto hover:scale-115 hover:border-accent-teal/50 hover:shadow-accent-teal/10 transition-all duration-300"
-            animate={{ 
-              y: [0, -8, 0],
-              scale: isHovered ? 1.08 : 1
-            }}
-            transition={{
-              y: { duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0 },
-              scale: { duration: 0.3 }
-            }}
-          >
-            <Lightbulb size={20} className={isHovered ? "text-amber-500 transition-colors duration-300" : "transition-colors duration-300"} />
-          </motion.div>
-
-          {/* Node 2: Điều hòa/Khí hậu (Top-Right) */}
-          <motion.div
-            className="absolute top-[13%] right-[5%] hidden sm:flex items-center justify-center p-3 rounded-full bg-white/70 dark:bg-zinc-900/70 border border-zinc-200/50 dark:border-zinc-800/50 backdrop-blur-md shadow-lg text-zinc-700 dark:text-zinc-300 pointer-events-auto hover:scale-115 hover:border-accent-teal/50 hover:shadow-accent-teal/10 transition-all duration-300"
-            animate={{ 
-              y: [0, -8, 0],
-              scale: isHovered ? 1.08 : 1
-            }}
-            transition={{
-              y: { duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1 },
-              scale: { duration: 0.3 }
-            }}
-          >
-            <Thermometer size={20} className={isHovered ? "text-cyan-500 transition-colors duration-300" : "transition-colors duration-300"} />
-          </motion.div>
-
-          {/* Node 3: An ninh/Khóa cửa (Bottom-Left) */}
-          <motion.div
-            className="absolute bottom-[13%] left-[5%] hidden sm:flex items-center justify-center p-3 rounded-full bg-white/70 dark:bg-zinc-900/70 border border-zinc-200/50 dark:border-zinc-800/50 backdrop-blur-md shadow-lg text-zinc-700 dark:text-zinc-300 pointer-events-auto hover:scale-115 hover:border-accent-teal/50 hover:shadow-accent-teal/10 transition-all duration-300"
-            animate={{ 
-              y: [0, -8, 0],
-              scale: isHovered ? 1.08 : 1
-            }}
-            transition={{
-              y: { duration: 4, repeat: Infinity, ease: "easeInOut", delay: 0.5 },
-              scale: { duration: 0.3 }
-            }}
-          >
-            <ShieldCheck size={20} className={isHovered ? "text-emerald-500 transition-colors duration-300" : "transition-colors duration-300"} />
-          </motion.div>
-
-          {/* Node 4: Loa/Âm thanh (Bottom-Right) */}
-          <motion.div
-            className="absolute bottom-[10%] right-[7%] hidden sm:flex items-center justify-center p-3 rounded-full bg-white/70 dark:bg-zinc-900/70 border border-zinc-200/50 dark:border-zinc-800/50 backdrop-blur-md shadow-lg text-zinc-700 dark:text-zinc-300 pointer-events-auto hover:scale-115 hover:border-accent-teal/50 hover:shadow-accent-teal/10 transition-all duration-300"
-            animate={{ 
-              y: [0, -8, 0],
-              scale: isHovered ? 1.08 : 1
-            }}
-            transition={{
-              y: { duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1.5 },
-              scale: { duration: 0.3 }
-            }}
-          >
-            <SpeakerHigh size={20} className={isHovered ? "text-violet-500 transition-colors duration-300" : "transition-colors duration-300"} />
-          </motion.div>
-          
-          {/* Thùng chứa kép Double-Bezel cho ảnh thiết bị */}
-          <div className="p-2 rounded-2xl bg-zinc-200/40 dark:bg-white/5 border border-zinc-200/50 dark:border-white/10 shadow-2xl z-10">
-            <motion.div 
-              animate={{ y: [0, -10, 0] }}
-              transition={{
-                duration: 6,
-                repeat: Infinity,
-                ease: 'easeInOut',
-              }}
-              className="rounded-xl overflow-hidden border border-zinc-300/40 dark:border-white/10"
-            >
-              <img 
-                src={hubDeviceImg} 
-                alt="Bộ điều khiển thông minh Helicorp Hub" 
-                className="w-full max-w-[480px] h-auto object-cover"
-                loading="eager"
-              />
-            </motion.div>
-          </div>
+          <span className="w-1.5 h-1.5 rounded-full bg-accent-teal animate-pulse" />
+          <span className="
+            text-[10px] uppercase tracking-[0.22em] font-semibold font-sans
+            text-zinc-500 dark:text-zinc-400
+          ">
+            Bộ Điều Khiển Thế Hệ Mới
+          </span>
         </motion.div>
 
+        {/* H1 — Massive editorial headline */}
+        <motion.h1
+          variants={fadeUp}
+          initial="hidden"
+          animate="show"
+          transition={transition(0.08)}
+          className="
+            font-display font-black tracking-tighter leading-[1.02]
+            text-[clamp(2.6rem,6vw,5.25rem)]
+            text-zinc-900 dark:text-white
+          "
+        >
+          Một chạm kết&nbsp;nối.{' '}
+          <br />
+          <span className="
+            text-transparent bg-clip-text
+            bg-[linear-gradient(90deg,#00c9b1_0%,#0099cc_60%,#7c5cbf_100%)]
+            dark:bg-[linear-gradient(90deg,#00f2fe_0%,#4facfe_60%,#a78bfa_100%)]
+          ">
+            Vạn thiết bị&nbsp;thông minh.
+          </span>
+        </motion.h1>
+
+        {/* Sub-copy */}
+        <motion.p
+          variants={fadeUp}
+          initial="hidden"
+          animate="show"
+          transition={transition(0.16)}
+          className="
+            text-[15px] leading-[1.75] max-w-[42ch] font-sans
+            text-zinc-500 dark:text-zinc-400
+          "
+        >
+          Helicorp OS hợp nhất toàn bộ hệ sinh thái thiết bị thông minh vào
+          một giao diện trực quan — kiểm soát năng lượng, an ninh và tiện nghi
+          theo thời gian thực từ bất kỳ đâu.
+        </motion.p>
+
+        {/* CTA row — Button-in-Button architecture */}
+        <motion.div
+          variants={fadeUp}
+          initial="hidden"
+          animate="show"
+          transition={transition(0.24)}
+          className="flex flex-row flex-wrap items-center gap-4"
+        >
+          {/* PRIMARY CTA */}
+          <button
+            id="hero-cta-buy"
+            onClick={() =>
+              addToCart({
+                id: 'helicorp-hub-01',
+                name: 'Bộ Điều Khiển Helicorp Hub',
+                price: 4_890_000,
+                image: hubDeviceImg,
+              })
+            }
+            className="
+              group flex items-center gap-3.5
+              pl-6 pr-2.5 py-2.5 rounded-full
+              bg-[linear-gradient(135deg,#00c9b1,#0099cc)]
+              dark:bg-[linear-gradient(135deg,#00f2fe,#4facfe)]
+              text-white dark:text-zinc-950
+              font-bold text-sm font-sans
+              shadow-[0_0_20px_rgba(0,153,204,0.22)]
+              dark:shadow-[0_0_28px_rgba(0,242,254,0.25)]
+              hover:shadow-[0_0_36px_rgba(0,153,204,0.38)]
+              dark:hover:shadow-[0_0_40px_rgba(0,242,254,0.40)]
+              active:scale-[0.97]
+              transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]
+              cursor-pointer
+            "
+            aria-label="Thêm Helicorp Hub vào giỏ hàng"
+          >
+            <span>Mua ngay</span>
+            {/* Trailing icon circle — kinetic Button-in-Button */}
+            <span className="
+              w-8 h-8 rounded-full
+              bg-white/20 dark:bg-black/12
+              flex items-center justify-center
+              group-hover:translate-x-[3px] group-hover:-translate-y-[2px] group-hover:scale-105
+              transition-transform duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]
+            ">
+              <ArrowUpRight size={14} weight="bold" />
+            </span>
+          </button>
+
+          {/* SECONDARY CTA */}
+          <button
+            id="hero-cta-explore"
+            onClick={scrollToFeatures}
+            className="
+              px-6 py-3 rounded-full
+              border border-zinc-300/80 dark:border-white/12
+              bg-white/60          dark:bg-white/5
+              shadow-[inset_0_1px_1px_rgba(0,0,0,0.04)]
+              dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.07)]
+              text-zinc-700 dark:text-zinc-300
+              text-sm font-semibold font-sans
+              hover:border-accent-teal/50 hover:text-zinc-900 dark:hover:text-white
+              hover:bg-white/90       dark:hover:bg-white/8
+              active:scale-[0.97]
+              transition-all duration-700 ease-[cubic-bezier(0.32,0.72,0,1)]
+              cursor-pointer
+            "
+          >
+            Xem tính năng
+          </button>
+        </motion.div>
+
+        {/* Stat chips row */}
+        <motion.div
+          variants={fadeUp}
+          initial="hidden"
+          animate="show"
+          transition={transition(0.34)}
+          className="flex flex-row flex-wrap gap-3 mt-1"
+        >
+          {STAT_CHIPS.map(({ icon: Icon, label, sub }) => (
+            <div
+              key={label}
+              className="
+                flex items-center gap-2.5
+                px-4 py-2.5 rounded-[1.2rem]
+                border border-zinc-200/80 dark:border-white/8
+                bg-white/70            dark:bg-white/[0.04]
+                shadow-[0_1px_3px_rgba(0,0,0,0.06)]
+                dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]
+              "
+            >
+              {/* Double-bezel icon pip */}
+              <span className="
+                w-7 h-7 rounded-[0.6rem]
+                border border-accent-teal/25 dark:border-accent-teal/20
+                bg-accent-teal/10
+                flex items-center justify-center shrink-0
+              ">
+                <Icon size={14} weight="light" className="text-accent-teal dark:text-accent-teal" />
+              </span>
+              <div className="flex flex-col leading-none">
+                <span className="text-[12px] font-bold font-sans text-zinc-800 dark:text-white">{label}</span>
+                <span className="text-[10px] font-sans mt-0.5 text-zinc-500 dark:text-zinc-500">{sub}</span>
+              </div>
+            </div>
+          ))}
+        </motion.div>
+
+        {/* Scroll indicator */}
+        <motion.button
+          onClick={scrollToFeatures}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ delay: prefersReduced ? 0 : 1.4, duration: 0.6 }}
+          className="
+            flex items-center gap-2.5 mt-2
+            text-zinc-400 dark:text-zinc-600
+            hover:text-accent-teal dark:hover:text-accent-teal
+            transition-colors duration-500 ease-[cubic-bezier(0.32,0.72,0,1)]
+            cursor-pointer
+          "
+          aria-label="Cuộn xuống xem tính năng"
+        >
+          <span className="text-[10px] uppercase tracking-widest font-semibold font-sans">Khám phá</span>
+          <motion.span
+            animate={prefersReduced ? {} : { y: [0, 5, 0] }}
+            transition={{ repeat: Infinity, duration: 1.8, ease: 'easeInOut' }}
+          >
+            <ArrowDown size={14} />
+          </motion.span>
+        </motion.button>
       </div>
+
+      {/* ══════════════════════════════════════════════════════════════════
+          RIGHT COLUMN — Device in Double-Bezel frame
+      ══════════════════════════════════════════════════════════════════ */}
+      <motion.div
+        initial={{ opacity: 0, y: 48, scale: 0.95 }}
+        animate={{ opacity: 1, y: 0, scale: 1 }}
+        transition={{
+          duration: prefersReduced ? 0 : 1.1,
+          delay:    prefersReduced ? 0 : 0.3,
+          ease: SPRING,
+        }}
+        className="
+          relative z-10
+          w-full lg:w-[48%] xl:w-[52%]
+          flex items-center justify-center
+          lg:h-[100dvh]
+        "
+        aria-hidden="true"
+      >
+        {/* Ambient glow behind device */}
+        <div className="
+          absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2
+          w-[110%] h-[110%] rounded-full pointer-events-none
+          bg-[radial-gradient(ellipse_at_center,rgba(0,201,177,0.07)_0%,transparent_65%)]
+          dark:bg-[radial-gradient(ellipse_at_center,rgba(0,242,254,0.10)_0%,transparent_65%)]
+        " />
+
+        {/* ── OUTER BEZEL SHELL ──────────────────────────────────────── */}
+        <div className="
+          relative w-full max-w-[520px]
+          p-2 rounded-[2.4rem]
+          border border-zinc-200/70       dark:border-white/10
+          bg-zinc-100/50                  dark:bg-white/[0.03]
+          shadow-[0_4px_32px_rgba(0,0,0,0.08),inset_0_1px_1px_rgba(255,255,255,0.9)]
+          dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.07),0_0_80px_rgba(0,242,254,0.06)]
+        ">
+          {/* ── INNER CORE ─────────────────────────────────────────── */}
+          <div className="
+            relative w-full overflow-hidden rounded-[calc(2.4rem-0.5rem)]
+            border border-zinc-200/60 dark:border-white/8
+            bg-white            dark:bg-zinc-950
+            shadow-[inset_0_1px_1px_rgba(0,0,0,0.04)]
+            dark:shadow-[inset_0_1px_1px_rgba(255,255,255,0.06)]
+          ">
+            {/* Top chrome bar */}
+            <div className="
+              absolute top-0 left-0 right-0 h-7 z-10
+              flex items-center justify-between px-4
+              border-b border-zinc-200/60 dark:border-white/6
+              bg-zinc-50/90 dark:bg-zinc-950/80
+            ">
+              <span className="flex gap-1.5">
+                {['bg-zinc-300 dark:bg-zinc-700', 'bg-zinc-300 dark:bg-zinc-700', 'bg-zinc-300 dark:bg-zinc-700'].map((c, i) => (
+                  <span key={i} className={`w-2 h-2 rounded-full ${c}`} />
+                ))}
+              </span>
+              <span className="text-[9px] uppercase tracking-widest font-sans font-semibold text-zinc-400 dark:text-zinc-600">
+                Helicorp OS
+              </span>
+              <span className="w-2 h-2 rounded-full bg-accent-teal animate-pulse" />
+            </div>
+
+            {/* Device image */}
+            <motion.img
+              ref={imgRef}
+              src={hubDeviceImg}
+              alt="Bộ điều khiển thông minh Helicorp Hub — Smart Home Controller"
+              className="w-full h-auto object-cover object-top pt-7"
+              loading="eager"
+              onLoad={() => setLoaded(true)}
+              animate={loaded && !prefersReduced ? { y: [0, -7, 0] } : {}}
+              transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
+            />
+
+            {/* Gradient vignette bottom */}
+            <div className="
+              absolute bottom-0 left-0 right-0 h-28 pointer-events-none
+              bg-[linear-gradient(to_top,#ffffff_0%,transparent_100%)]
+              dark:bg-[linear-gradient(to_top,#050505_0%,transparent_100%)]
+            " />
+
+            {/* Live badge — bottom-left */}
+            <div className="
+              absolute bottom-5 left-4 z-20
+              flex items-center gap-2
+              px-3 py-1.5 rounded-full
+              border border-accent-teal/25 dark:border-accent-teal/20
+              bg-white/80          dark:bg-zinc-950/80
+              shadow-[0_2px_8px_rgba(0,0,0,0.08)]
+              dark:shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]
+            ">
+              <span className="w-1.5 h-1.5 rounded-full bg-accent-teal animate-pulse" />
+              <span className="text-[10px] uppercase tracking-widest font-sans text-zinc-500 dark:text-zinc-400">
+                Live
+              </span>
+            </div>
+
+            {/* Energy badge — bottom-right */}
+            <div className="
+              absolute bottom-5 right-4 z-20
+              flex items-center gap-1.5
+              px-3 py-1.5 rounded-full
+              border border-zinc-200/70 dark:border-white/8
+              bg-white/80 dark:bg-zinc-950/80
+              shadow-[0_2px_8px_rgba(0,0,0,0.08)]
+            ">
+              <Lightning size={11} weight="fill" className="text-amber-400" />
+              <span className="text-[10px] font-bold font-sans text-zinc-700 dark:text-zinc-300">−28% điện</span>
+            </div>
+          </div>
+        </div>
+      </motion.div>
     </section>
   );
 });

@@ -79,9 +79,9 @@ export const SubscribeForm = React.memo(function SubscribeForm() {
   return (
     <section 
       id="subscribe" 
-      className="py-24 px-6 bg-zinc-950/20 relative"
+      className="py-24 px-6 bg-zinc-50 dark:bg-oled-black relative overflow-hidden"
     >
-      <div className="max-w-4xl mx-auto w-full flex flex-col gap-12">
+      <div className="max-w-4xl mx-auto w-full flex flex-col gap-12 relative z-10">
         
         {/* Phần tiêu đề thông điệp */}
         <div className="text-center flex flex-col gap-4">

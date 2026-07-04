@@ -18,9 +18,19 @@ function App() {
   return (
     <CartProvider>
       <div className="relative min-h-screen flex flex-col bg-zinc-50 dark:bg-oled-black text-zinc-900 dark:text-zinc-100 selection:bg-accent-teal/30 selection:text-accent-teal transition-colors duration-500">
-        {/* Subtle background glow effect (Ethereal Glass theme) */}
-        <div className="absolute top-[-10%] left-[-10%] w-[50%] h-[50%] rounded-full bg-accent-teal/5 blur-[120px] pointer-events-none" />
-        <div className="absolute bottom-[-10%] right-[-10%] w-[50%] h-[50%] rounded-full bg-accent-blue/5 blur-[120px] pointer-events-none" />
+        {/* 
+          Ambient Glow Layer toàn trang — fixed, không di chuyển khi scroll.
+          Tạo nền màu sắc liên tục, mượt mà xuyên suốt mọi section.
+          Các orbs phân tán theo đường chéo (Diagonal Flow):
+            Top-Left  → Teal  (Hero)
+            Center-Right → Blue  (SmartFeaturesHub / TechSpecs)
+            Bottom-Left  → Teal  (SubscribeForm / Footer)
+        */}
+        <div className="fixed inset-0 pointer-events-none overflow-hidden z-0" aria-hidden="true">
+          <div className="absolute top-[-5%] left-[-5%] w-[55%] h-[45%] rounded-full bg-accent-teal/5 dark:bg-accent-teal/8 blur-[140px]" />
+          <div className="absolute top-[35%] right-[-8%] w-[45%] h-[40%] rounded-full bg-accent-blue/4 dark:bg-accent-blue/7 blur-[130px]" />
+          <div className="absolute bottom-[-5%] left-[-5%] w-[50%] h-[40%] rounded-full bg-accent-teal/4 dark:bg-accent-teal/6 blur-[140px]" />
+        </div>
 
         {/* Global sticky navigation bar */}
         <Navbar />

@@ -12,11 +12,8 @@ export const SmartFeaturesHub = React.memo(function SmartFeaturesHub() {
   return (
     <section 
       id="dashboard" 
-      className="py-24 px-6 relative bg-zinc-50 dark:bg-oled-black transition-colors duration-500 overflow-hidden border-t border-zinc-200/50 dark:border-zinc-900/50"
+      className="py-24 px-6 relative bg-zinc-50 dark:bg-oled-black transition-colors duration-500 overflow-hidden"
     >
-      {/* Vòng hào quang sáng nền chính */}
-      <div className="absolute top-[10%] left-[5%] w-[450px] h-[450px] rounded-full bg-accent-teal/3 dark:bg-accent-teal/5 blur-[130px] pointer-events-none" />
-      <div className="absolute bottom-[10%] right-[5%] w-[450px] h-[450px] rounded-full bg-accent-blue/3 dark:bg-accent-blue/5 blur-[130px] pointer-events-none" />
 
       <div className="max-w-6xl mx-auto w-full flex flex-col gap-16 md:gap-24 relative z-10">
         
@@ -41,13 +38,13 @@ export const SmartFeaturesHub = React.memo(function SmartFeaturesHub() {
           {/* Phân hệ 1: An ninh chủ động */}
           <div className="relative">
             <SmartSecurity />
-            <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-linear-to-r from-transparent via-zinc-200/80 dark:via-zinc-800/80 to-transparent" />
+            {/* <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-linear-to-r from-transparent via-zinc-200/80 dark:via-zinc-800/80 to-transparent" /> */}
           </div>
 
           {/* Phân hệ 2: Khí hậu & năng lượng */}
           <div className="relative">
             <SmartClimate />
-            <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-linear-to-r from-transparent via-zinc-200/80 dark:via-zinc-800/80 to-transparent" />
+            {/* <div className="absolute bottom-0 left-0 right-0 h-[1px] bg-linear-to-r from-transparent via-zinc-200/80 dark:via-zinc-800/80 to-transparent" /> */}
           </div>
 
           {/* Phân hệ 3: Không gian tiện nghi */}
