@@ -2,7 +2,7 @@ import { CartProvider } from './hooks/useCart';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { Hero } from './sections/Hero';
-import { SmartDashboard } from './sections/SmartDashboard';
+import { SmartFeaturesHub } from './sections/SmartFeaturesHub';
 import { TechSpecs } from './sections/TechSpecs';
 import { SubscribeForm } from './sections/SubscribeForm';
 import { MiniCart } from './components/MiniCart';
@@ -34,7 +34,7 @@ function App() {
         {/* Main page content sections */}
         <main className="flex-grow">
           <Hero />
-          <SmartDashboard />
+          <SmartFeaturesHub />
           <TechSpecs />
           <SubscribeForm />
         </main>
