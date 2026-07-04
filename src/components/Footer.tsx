@@ -136,24 +136,6 @@ export const Footer = React.memo(function Footer() {
 
         </div>
 
-        {/* Dòng phân tách & Trạng thái hệ thống bên dưới */}
-        <div className="mt-16 pt-8 border-t border-zinc-200/10 dark:border-white/5 flex flex-col md:flex-row items-center justify-between gap-4">
-          <p className="text-xs text-zinc-500 dark:text-zinc-500">
-            &copy; {new Date().getFullYear()} HELICORP. Tất cả các quyền được bảo lưu.
-          </p>
-          
-          {/* Trạng thái máy chủ (Status Indicator) */}
-          <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-zinc-100 dark:bg-zinc-900/50 border border-zinc-200/50 dark:border-zinc-800/50">
-            <span className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-            </span>
-            <span className="text-[10px] font-medium text-zinc-600 dark:text-zinc-400">
-              Mọi hệ thống đang hoạt động ổn định
-            </span>
-          </div>
-        </div>
-
       </div>
     </footer>
   );
