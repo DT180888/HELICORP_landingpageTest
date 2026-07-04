@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { ChatTeardropText, PaperPlaneRight, X, CircleNotch, Robot, User, Sparkle } from '@phosphor-icons/react';
+import { ChatTeardropText, PaperPlaneRight, X, CircleNotch, Robot, User, Sparkle, Question, CaretDown } from '@phosphor-icons/react';
 
 /**
  * Định nghĩa cấu trúc của một tin nhắn trong đoạn chat.
@@ -69,6 +69,7 @@ export const ChatbotWidget = React.memo(function ChatbotWidget() {
   const [inputVal, setInputVal] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [hasNotification, setHasNotification] = useState<boolean>(true);
+  const [showFaq, setShowFaq] = useState<boolean>(false);
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -193,7 +194,7 @@ Nếu người dùng hỏi các vấn đề ngoài phạm vi nhà thông minh ho
   };
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+    <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end font-sans">
       
       {/* Khung chat hội thoại */}
       <AnimatePresence>
@@ -216,12 +217,12 @@ Nếu người dùng hỏi các vấn đề ngoài phạm vi nhà thông minh ho
                   <span className="absolute bottom-0 right-0 w-2.5 h-2.5 rounded-full bg-emerald-500 border border-white dark:border-zinc-950 animate-pulse" />
                 </div>
                 <div>
-                  <h4 className="text-xs sm:text-sm font-bold text-zinc-900 dark:text-white font-display">
+                  <h4 className="text-xs sm:text-sm font-bold text-zinc-900 dark:text-zinc-100 font-display">
                     Helicorp Assistant
                   </h4>
                   <div className="flex items-center gap-1">
-                    <span className="text-[10px] text-zinc-500">
-                      {GEMINI_API_KEY && GEMINI_API_KEY !== 'your_gemini_api_key_here' ? 'AI Pro Actived' : 'Offline Mode'}
+                    <span className="text-[10px] text-zinc-500 dark:text-zinc-400">
+                      {GEMINI_API_KEY && GEMINI_API_KEY !== 'your_gemini_api_key_here' ? 'AI Pro Activated' : 'Offline Mode'}
                     </span>
                     <Sparkle size={8} weight="fill" className="text-amber-500 animate-spin" />
                   </div>
@@ -229,7 +230,7 @@ Nếu người dùng hỏi các vấn đề ngoài phạm vi nhà thông minh ho
               </div>
               <button
                 onClick={() => setIsOpen(false)}
-                className="w-7 h-7 rounded-full border border-zinc-250 dark:border-zinc-800 flex items-center justify-center text-zinc-500 hover:text-zinc-800 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors cursor-pointer"
+                className="w-7 h-7 rounded-full border border-zinc-200 dark:border-zinc-800 flex items-center justify-center text-zinc-500 hover:text-zinc-800 dark:hover:text-white hover:bg-zinc-100 dark:hover:bg-zinc-900 transition-colors cursor-pointer"
                 aria-label="Đóng khung chat"
               >
                 <X size={14} />
@@ -253,10 +254,10 @@ Nếu người dùng hỏi các vấn đề ngoài phạm vi nhà thông minh ho
                     {msg.sender === 'user' ? <User size={14} /> : <Robot size={14} />}
                   </div>
                   
-                  <div className={`p-3 rounded-2xl text-xs leading-relaxed ${
+                  <div className={`p-3 rounded-2xl text-[13px] leading-relaxed ${
                     msg.sender === 'user'
-                      ? 'bg-linear-to-r from-accent-teal to-accent-blue text-zinc-950 font-medium rounded-tr-none'
-                      : 'bg-zinc-100 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-850 text-zinc-800 dark:text-zinc-250 rounded-tl-none'
+                      ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-950 font-medium rounded-tr-none'
+                      : 'bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100 rounded-tl-none'
                   }`}>
                     {msg.text}
                   </div>
@@ -269,7 +270,7 @@ Nếu người dùng hỏi các vấn đề ngoài phạm vi nhà thông minh ho
                   <div className="w-7 h-7 rounded-full bg-accent-teal/10 border border-accent-teal/20 text-accent-teal flex items-center justify-center shrink-0">
                     <Robot size={14} />
                   </div>
-                  <div className="p-3.5 rounded-2xl bg-zinc-100 dark:bg-zinc-900/60 border border-zinc-200 dark:border-zinc-850 rounded-tl-none flex items-center gap-1">
+                  <div className="p-3 rounded-2xl bg-zinc-100 dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-tl-none flex items-center gap-1.5 p-3">
                     <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 dark:bg-zinc-500 animate-bounce" style={{ animationDelay: '0ms' }} />
                     <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 dark:bg-zinc-500 animate-bounce" style={{ animationDelay: '150ms' }} />
                     <span className="w-1.5 h-1.5 rounded-full bg-zinc-400 dark:bg-zinc-500 animate-bounce" style={{ animationDelay: '300ms' }} />
@@ -280,20 +281,61 @@ Nếu người dùng hỏi các vấn đề ngoài phạm vi nhà thông minh ho
             </div>
 
             {/* Khối gợi ý câu hỏi nhanh & Nhập liệu */}
-            <div className="p-4 border-t border-zinc-200 dark:border-zinc-850 bg-white dark:bg-[#070709]">
+            <div className="p-4 border-t border-zinc-200 dark:border-zinc-800 bg-white dark:bg-[#070709]">
               
-              {/* Câu hỏi nhanh */}
-              {messages.length < 4 && !isLoading && (
-                <div className="flex flex-wrap gap-1.5 mb-3">
+              {/* Câu hỏi nhanh - Tự động xuống hàng để hiển thị đầy đủ */}
+              {messages.length === 1 && !isLoading && (
+                <div className="flex flex-wrap gap-1.5 mb-3 w-full">
                   {QUICK_QUESTIONS.map((q, idx) => (
                     <button
                       key={idx}
                       onClick={() => handleSendMessage(q)}
-                      className="px-2.5 py-1 rounded-full border border-zinc-200 dark:border-zinc-800 text-[10px] text-zinc-650 dark:text-zinc-400 hover:border-accent-teal/30 hover:text-accent-teal transition-all cursor-pointer font-sans"
+                      className="px-2.5 py-1 rounded-full border border-zinc-200 dark:border-zinc-800 text-[10px] sm:text-[11px] text-zinc-600 dark:text-zinc-400 bg-zinc-50/50 hover:bg-zinc-100 dark:bg-zinc-950 dark:hover:bg-zinc-900 transition-all cursor-pointer font-sans"
                     >
                       {q}
                     </button>
                   ))}
+                </div>
+              )}
+
+              {/* Hộp câu hỏi thường gặp dạng đóng mở khi đã có hội thoại */}
+              {messages.length > 1 && !isLoading && (
+                <div className="flex flex-col gap-2 mb-3">
+                  <button
+                    type="button"
+                    onClick={() => setShowFaq(!showFaq)}
+                    className="flex items-center gap-1.5 text-[10px] font-bold text-zinc-500 hover:text-zinc-800 dark:hover:text-zinc-350 transition-colors w-fit cursor-pointer self-start uppercase tracking-wider font-sans"
+                  >
+                    <Question size={13} weight="bold" />
+                    <span>Câu hỏi thường gặp</span>
+                    <CaretDown size={11} weight="bold" className={`transition-transform duration-205 ${showFaq ? 'rotate-180' : ''}`} />
+                  </button>
+                  
+                  <AnimatePresence>
+                    {showFaq && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden w-full"
+                      >
+                        <div className="flex flex-wrap gap-1.5 py-1 w-full">
+                          {QUICK_QUESTIONS.map((q, idx) => (
+                            <button
+                              key={idx}
+                              onClick={() => {
+                                handleSendMessage(q);
+                                setShowFaq(false); // Đóng lại sau khi hỏi
+                              }}
+                              className="px-2.5 py-1 rounded-full border border-zinc-200 dark:border-zinc-800 text-[10px] sm:text-[11px] text-zinc-600 dark:text-zinc-400 bg-zinc-50/50 hover:bg-zinc-100 dark:bg-zinc-950 dark:hover:bg-zinc-900 transition-all cursor-pointer font-sans"
+                            >
+                              {q}
+                            </button>
+                          ))}
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
                 </div>
               )}
 
@@ -311,7 +353,7 @@ Nếu người dùng hỏi các vấn đề ngoài phạm vi nhà thông minh ho
                   value={inputVal}
                   onChange={(e) => setInputVal(e.target.value)}
                   disabled={isLoading}
-                  className="flex-1 px-3.5 py-2.5 rounded-xl border border-zinc-250 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-550 font-sans text-xs focus:outline-hidden focus:border-accent-teal focus:ring-1 focus:ring-accent-teal/20 transition-all disabled:opacity-50"
+                  className="flex-1 px-3.5 py-2.5 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-zinc-50 dark:bg-zinc-950 text-zinc-900 dark:text-white placeholder-zinc-400 dark:placeholder-zinc-600 font-sans text-xs focus:outline-hidden focus:border-accent-teal focus:ring-1 focus:ring-accent-teal/20 transition-all disabled:opacity-50"
                 />
                 <button
                   type="submit"
