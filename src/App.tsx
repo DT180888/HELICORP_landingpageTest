@@ -1,16 +1,29 @@
+import { Suspense, lazy } from 'react';
 import { CartProvider } from './hooks/useCart';
 import { Navbar } from './components/Navbar';
 import { Footer } from './components/Footer';
 import { Hero } from './sections/Hero';
-import { SmartFeaturesHub } from './sections/SmartFeaturesHub';
-import { TechSpecs } from './sections/TechSpecs';
-import { SubscribeForm } from './sections/SubscribeForm';
-import { MiniCart } from './components/MiniCart';
-import { ChatbotWidget } from './components/ChatbotWidget';
+
+// Below-the-fold sections & widgets (Lazy loaded for code-splitting & performance optimization)
+const SmartFeaturesHub = lazy(() => import('./sections/SmartFeaturesHub').then(m => ({ default: m.SmartFeaturesHub })));
+const TechSpecs = lazy(() => import('./sections/TechSpecs').then(m => ({ default: m.TechSpecs })));
+const SubscribeForm = lazy(() => import('./sections/SubscribeForm').then(m => ({ default: m.SubscribeForm })));
+const MiniCart = lazy(() => import('./components/MiniCart').then(m => ({ default: m.MiniCart })));
+const ChatbotWidget = lazy(() => import('./components/ChatbotWidget').then(m => ({ default: m.ChatbotWidget })));
+
+// Minimalist, smooth loading skeleton fallback for below-the-fold components
+function SectionSkeleton() {
+  return (
+    <div className="w-full py-16 flex items-center justify-center min-h-[240px]">
+      <div className="w-6 h-6 rounded-full border-2 border-accent-teal/30 border-t-accent-teal animate-spin" />
+    </div>
+  );
+}
 
 /**
  * Component App chính của hệ thống.
  * Tích hợp ngữ cảnh giỏ hàng toàn cục CartProvider và thiết lập cấu trúc bố cục chính của trang.
+ * Tối ưu hóa tải trang bằng React.lazy & Suspense.
  * 
  * @returns {JSX.Element} Giao diện bố cục gốc của Landing Page.
  */
@@ -21,10 +34,6 @@ function App() {
         {/* 
           Ambient Glow Layer toàn trang — fixed, không di chuyển khi scroll.
           Tạo nền màu sắc liên tục, mượt mà xuyên suốt mọi section.
-          Các orbs phân tán theo đường chéo (Diagonal Flow):
-            Top-Left  → Teal  (Hero)
-            Center-Right → Blue  (SmartFeaturesHub / TechSpecs)
-            Bottom-Left  → Teal  (SubscribeForm / Footer)
         */}
         <div className="fixed inset-0 pointer-events-none overflow-hidden z-0" aria-hidden="true">
           <div className="absolute top-[-5%] left-[-5%] w-[55%] h-[45%] rounded-full bg-accent-teal/5 dark:bg-accent-teal/8 blur-[140px]" />
@@ -35,18 +44,23 @@ function App() {
         {/* Global sticky navigation bar */}
         <Navbar />
 
-        {/* Giỏ hàng mini (MiniCart Drawer) */}
-        <MiniCart />
-
-        {/* Cửa sổ Chatbot AI (Chatbot Widget) */}
-        <ChatbotWidget />
+        {/* Giỏ hàng mini & Chatbot AI (Lazy Loaded) */}
+        <Suspense fallback={null}>
+          <MiniCart />
+          <ChatbotWidget />
+        </Suspense>
 
         {/* Main page content sections */}
         <main className="flex-grow">
+          {/* Critical path Hero section loaded synchronously */}
           <Hero />
-          <SmartFeaturesHub />
-          <TechSpecs />
-          <SubscribeForm />
+
+          {/* Below-the-fold sections wrapped in Suspense */}
+          <Suspense fallback={<SectionSkeleton />}>
+            <SmartFeaturesHub />
+            <TechSpecs />
+            <SubscribeForm />
+          </Suspense>
         </main>
 
         {/* Chân trang */}

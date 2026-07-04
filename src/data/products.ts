@@ -21,7 +21,7 @@ export const MOCK_PRODUCTS: ProductData[] = [
     price: 4890000,
     description: 'Bộ não điều hành toàn bộ hệ thống nhà thông minh qua AI cục bộ.',
     category: 'Trung tâm',
-    image: '/src/assets/hub_device.webp'
+    image: '/src/assets/hub_device_compressed.webp'
   },
   {
     id: 'helicorp-door-02',
